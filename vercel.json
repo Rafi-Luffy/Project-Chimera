@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "buildCommand": "cd frontend-react && npm install && npm run build",
+  "outputDirectory": "frontend-react/dist",
+  "framework": "vite",
+  "installCommand": "cd frontend-react && npm install",
+  "devCommand": "cd frontend-react && npm run dev",
+  "env": {
+    "VITE_BACKEND_URL": "https://chimera-backend-api.onrender.com"
+  }
+}

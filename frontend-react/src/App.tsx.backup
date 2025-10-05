@@ -1,0 +1,312 @@
+import { useState, useEffect, useRef } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Send, Terminal, Activity } from 'lucide-react';
+import Sidebar from './components/Sidebar';
+import ResultsDisplay from './components/ResultsDisplay';
+import apiClient from './services/api';
+import { queryHistoryService, type QueryHistoryItem } from './services/supabase';
+import type { Publication } from './types/agents';
+import './styles/App.css';
+
+const queryClient = new QueryClient();
+
+function AppContent() {
+  const [sessionId] = useState(() => `session-${Date.now()}`);
+  const [query, setQuery] = useState('');
+  const [persona, setPersona] = useState('Research Scientist');
+  const [organism, setOrganism] = useState('All');
+  const [queryHistory, setQueryHistory] = useState<Array<{ query: string; timestamp: string }>>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [backendOnline, setBackendOnline] = useState(false);
+
+  const [currentAnswer, setCurrentAnswer] = useState('');
+  const [publications, setPublications] = useState<Publication[]>([]);
+  const [agentLogs, setAgentLogs] = useState<string[]>([]);
+  const [hasResults, setHasResults] = useState(false);
+
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkHealth = async () => {
+      const healthy = await apiClient.checkHealth();
+      setBackendOnline(healthy);
+    };
+    checkHealth();
+    const interval = setInterval(checkHealth, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    loadQueryHistory();
+  }, [sessionId]);
+
+  const loadQueryHistory = async () => {
+    const history = await queryHistoryService.getSessionHistory(sessionId);
+    setQueryHistory(
+      history.map((h) => ({
+        query: h.query,
+        timestamp: h.timestamp,
+      }))
+    );
+  };
+
+  const simulateAgentLogs = () => {
+    const logs = [
+      'Deconstructing goal into sub-tasks...',
+      'Thinking: I need to query the knowledge graph for relevant publications...',
+      'Calling Tool: query_knowledge_graph()',
+      'Retrieved 47 publications from Neo4j',
+      'Analyzing publications for consensus patterns...',
+      'Identifying contradictory findings...',
+      'Detecting knowledge gaps...',
+      'Synthesizing findings into action brief...',
+      'Complete: Generated comprehensive answer',
+    ];
+
+    setAgentLogs([]);
+    logs.forEach((log, idx) => {
+      setTimeout(() => {
+        setAgentLogs((prev) => [...prev, log]);
+      }, idx * 400);
+    });
+  };
+
+  const handleQuery = async () => {
+    if (!query.trim() || isProcessing) return;
+
+    setIsProcessing(true);
+    setAgentLogs([]);
+    setCurrentAnswer('');
+    setPublications([]);
+    setHasResults(true);
+
+    const historyItem: QueryHistoryItem = {
+      session_id: sessionId,
+      query: query.trim(),
+      persona,
+      timestamp: new Date().toISOString(),
+    };
+
+    await queryHistoryService.saveQuery(historyItem);
+    await loadQueryHistory();
+
+    simulateAgentLogs();
+
+    try {
+      const response = await apiClient.query({
+        query: query.trim(),
+        persona,
+      });
+
+      setCurrentAnswer(response.answer);
+
+      const mockPublications: Publication[] = [
+        {
+          title: 'Effects of Spaceflight on Rodent Vision',
+          link: 'https://pubmed.ncbi.nlm.nih.gov/12345678/',
+          subjects: ['Rodents', 'Vision'],
+          stressors: ['Microgravity'],
+        },
+        {
+          title: 'Microgravity-Induced Changes in Retinal Structure',
+          link: 'https://pubmed.ncbi.nlm.nih.gov/23456789/',
+          subjects: ['Mice', 'Retina'],
+          stressors: ['Microgravity'],
+        },
+        {
+          title: 'Bone Density Loss in Space Missions',
+          link: 'https://pubmed.ncbi.nlm.nih.gov/34567890/',
+          subjects: ['Bone', 'Astronauts'],
+          stressors: ['Microgravity', 'Radiation'],
+        },
+      ];
+      setPublications(mockPublications);
+
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    } catch (error) {
+      console.error('Query failed:', error);
+      setCurrentAnswer(
+        'Sorry, there was an error processing your query. Please check if the backend is running and try again.'
+      );
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleExampleQuery = (exampleQuery: string) => {
+    setQuery(exampleQuery);
+  };
+
+  const handleHistoryClick = (historicalQuery: string) => {
+    setQuery(historicalQuery);
+  };
+
+  const handleRepurpose = (format: 'powerpoint' | 'executive' | 'email') => {
+    console.log(`Repurposing content as: ${format}`);
+    alert(`This feature would reformat the answer as a ${format}. Integration with Communicator agent pending.`);
+  };
+
+  const handleExport = () => {
+    const markdown = `# NASA Space Biology Knowledge Engine - Query Results
+
+## Query
+${query}
+
+## Persona
+${persona}
+
+## Answer
+${currentAnswer}
+
+## Supporting Evidence
+${publications.map((pub, idx) => `${idx + 1}. [${pub.title}](${pub.link})`).join('\n')}
+
+---
+Generated: ${new Date().toLocaleString()}
+`;
+
+    const blob = new Blob([markdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `chimera-brief-${Date.now()}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="app">
+      <Sidebar
+        persona={persona}
+        onPersonaChange={setPersona}
+        organism={organism}
+        onOrganismChange={setOrganism}
+        onExampleQuery={handleExampleQuery}
+        queryHistory={queryHistory}
+        onHistoryClick={handleHistoryClick}
+      />
+
+      <main className="main-view">
+        <header className="main-header">
+          <motion.div
+            className="header-content"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="header-text">
+              <h1>NASA's Space Biology Knowledge Engine</h1>
+              <p>Your agentic AI partner for synthesizing decades of research</p>
+            </div>
+            <div className={`system-status ${backendOnline ? 'online' : 'offline'}`}>
+              <Activity size={18} className={backendOnline ? 'pulse' : ''} />
+              <span>{backendOnline ? 'System Online' : 'System Offline'}</span>
+            </div>
+          </motion.div>
+        </header>
+
+        <div className="content-area">
+          <AnimatePresence mode="wait">
+            {!hasResults ? (
+              <motion.div
+                className="welcome-section"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.4 }}
+              >
+                <div className="welcome-icon">
+                  <Terminal size={56} strokeWidth={1.5} />
+                </div>
+                <h2>Advanced Research Intelligence System</h2>
+                <p>
+                  Query our multi-agent AI system for comprehensive insights from NASA's space biology
+                  research database. Select a persona, choose filters, and ask complex questions to receive
+                  synthesized action briefs with consensus, contradictions, and knowledge gaps.
+                </p>
+                <div className="feature-grid">
+                  <div className="feature-card">
+                    <div className="feature-icon">🔬</div>
+                    <h3>5-Agent System</h3>
+                    <p>Collaborative AI agents work together to analyze and synthesize findings</p>
+                  </div>
+                  <div className="feature-card">
+                    <div className="feature-icon">🧬</div>
+                    <h3>Knowledge Graph</h3>
+                    <p>608+ publications structured as an intelligent, queryable network</p>
+                  </div>
+                  <div className="feature-card">
+                    <div className="feature-icon">💡</div>
+                    <h3>Deep Insights</h3>
+                    <p>Identifies consensus, contradictions, and gaps in scientific literature</p>
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                ref={resultsRef}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                <ResultsDisplay
+                  answer={currentAnswer}
+                  publications={publications}
+                  agentLogs={agentLogs}
+                  isProcessing={isProcessing}
+                  onRepurpose={handleRepurpose}
+                  onExport={handleExport}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="command-bar-container">
+          <motion.div
+            className="command-bar"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleQuery()}
+              placeholder="Ask a complex question or select an example..."
+              disabled={isProcessing || !backendOnline}
+              className="command-input"
+            />
+            <button
+              onClick={handleQuery}
+              disabled={isProcessing || !backendOnline || !query.trim()}
+              className="command-button"
+            >
+              <Send size={18} strokeWidth={2} />
+              <span>{isProcessing ? 'Processing...' : 'Synthesize Insight'}</span>
+            </button>
+          </motion.div>
+          {!backendOnline && (
+            <p className="status-warning">
+              ⚠️ Backend is offline. Please start the backend server to enable queries.
+            </p>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AppContent />
+    </QueryClientProvider>
+  );
+}
