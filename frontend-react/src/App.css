@@ -99,6 +99,46 @@
 
 /* Persona Selector */
 
+/* User Info Section */
+.user-info {
+  background: rgba(79, 172, 254, 0.05);
+  border: 1px solid rgba(79, 172, 254, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.user-email {
+  font-size: 13px;
+  color: var(--primary-text);
+  font-weight: 500;
+}
+
+.logout-button, .login-prompt {
+  padding: 8px 12px;
+  background: rgba(79, 172, 254, 0.1);
+  border: 1px solid rgba(79, 172, 254, 0.3);
+  border-radius: 6px;
+  color: var(--accent-color);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout-button:hover, .login-prompt:hover {
+  background: rgba(79, 172, 254, 0.2);
+  transform: translateY(-1px);
+}
+
+.login-prompt {
+  text-align: center;
+}
+
+/* Persona Selector */
+
 .persona-select {
   width: 100%;
   background: var(--card-bg);

@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import './App.css';
 import { CategoryDashboard } from './components/CategoryDashboard';
 import { ChatBot } from './components/ChatBot';
+import { Login } from './components/Login';
 
 // Backend API URL
 const API_URL = 'http://localhost:8000';
@@ -51,6 +52,12 @@ interface Brief {
 }
 
 function App() {
+  // Auth state
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authToken, setAuthToken] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [showLogin, setShowLogin] = useState(true);
+  
   const [query, setQuery] = useState('');
   const [persona, setPersona] = useState('Research Scientist');
   const [queryHistory, setQueryHistory] = useState<string[]>([]);
@@ -68,6 +75,43 @@ function App() {
   const [loadingCategory, setLoadingCategory] = useState(false);
   
   const contentRef = useRef<HTMLDivElement>(null);
+  
+  // Check for existing auth token on mount
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    const email = localStorage.getItem('user_email');
+    if (token && email) {
+      setAuthToken(token);
+      setUserEmail(email);
+      setIsAuthenticated(true);
+      setShowLogin(false);
+    }
+  }, []);
+  
+  // Handle login success
+  const handleLoginSuccess = (token: string, email: string) => {
+    if (token && email) {
+      setAuthToken(token);
+      setUserEmail(email);
+      setIsAuthenticated(true);
+    }
+    setShowLogin(false);
+  };
+  
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_email');
+    setAuthToken('');
+    setUserEmail('');
+    setIsAuthenticated(false);
+    setShowLogin(true);
+  };
+  
+  // Show login screen if needed
+  if (showLogin) {
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  }
   
   // Handle query submission
   const handleSubmit = async () => {
@@ -246,6 +290,24 @@ function App() {
         <div className="sidebar-header">
           <h1>Project <span className="accent">Chimera</span></h1>
         </div>
+        
+        {/* User Info - show auth status */}
+        {isAuthenticated && userEmail && (
+          <div className="sidebar-section user-info">
+            <div className="user-email">👤 {userEmail}</div>
+            <button className="logout-button" onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
+        )}
+        
+        {!isAuthenticated && (
+          <div className="sidebar-section user-info">
+            <button className="login-prompt" onClick={() => setShowLogin(true)}>
+              🔐 Login to save preferences
+            </button>
+          </div>
+        )}
         
         {/* NASA Data Sources */}
         <div className="sidebar-section">

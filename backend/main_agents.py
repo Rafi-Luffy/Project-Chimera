@@ -1,7 +1,7 @@
 """
 New Main API with 5-Agent Orchestrator System
 """
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -10,10 +10,22 @@ import json
 import asyncio
 import sys
 import os
+from datetime import timedelta
 from dotenv import load_dotenv
+from sqlalchemy.orm import Session
 
 # Load environment variables from .env file
 load_dotenv()
+
+# Import auth and database utilities
+from auth import (
+    get_password_hash, 
+    authenticate_user, 
+    create_access_token,
+    get_current_user,
+    ACCESS_TOKEN_EXPIRE_MINUTES
+)
+from database import get_db, init_db, User
 
 # Add backend directory to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
@@ -39,8 +51,38 @@ app.add_middleware(
 # Global orchestrator instance
 orchestrator = OrchestratorAgent()
 
+# Initialize database on startup
+@app.on_event("startup")
+def startup_event():
+    """Initialize database when app starts"""
+    init_db()
+
 
 # --- Request/Response Models ---
+
+# Authentication models
+class UserRegister(BaseModel):
+    email: str
+    password: str
+
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    preferred_persona: Optional[str]
+    usage_count: int
+
+
 class QueryRequest(BaseModel):
     question: Optional[str] = None  # Support 'question' field
     query: Optional[str] = None     # Support 'query' field
@@ -76,6 +118,70 @@ class QueryResponse(BaseModel):
 
 
 # --- API Endpoints ---
+
+# Authentication endpoints
+@app.post("/auth/register", response_model=Token)
+def register(user_data: UserRegister, db: Session = Depends(get_db)):
+    """Register a new user"""
+    # Check if user already exists
+    existing_user = db.query(User).filter(User.email == user_data.email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Create new user
+    hashed_password = get_password_hash(user_data.password)
+    new_user = User(
+        email=user_data.email,
+        hashed_password=hashed_password
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    # Create access token
+    access_token = create_access_token(
+        data={"sub": new_user.email},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.post("/auth/login", response_model=Token)
+def login(user_data: UserLogin, db: Session = Depends(get_db)):
+    """Login user"""
+    user = authenticate_user(db, user_data.email, user_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect email or password"
+        )
+    
+    # Create access token
+    access_token = create_access_token(
+        data={"sub": user.email},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.get("/auth/me", response_model=UserResponse)
+def get_current_user_info(
+    current_user: Optional[User] = Depends(get_current_user)
+):
+    """Get current user information"""
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "preferred_persona": current_user.preferred_persona,
+        "usage_count": current_user.usage_count
+    }
+
+
 @app.get("/")
 def root():
     """Root endpoint"""
@@ -145,7 +251,11 @@ def get_statistics():
 
 
 @app.post("/query", response_model=QueryResponse)
-async def query(request: QueryRequest):
+async def query(
+    request: QueryRequest,
+    current_user: Optional[User] = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
     Process a query through the 5-agent system
     
@@ -157,6 +267,7 @@ async def query(request: QueryRequest):
     5. Communicator formats output for persona
     
     Returns complete brief with evidence
+    Learns user preferences for authenticated users
     """
     try:
         # Process query through orchestrator
@@ -164,9 +275,11 @@ async def query(request: QueryRequest):
         if not query_text:
             raise HTTPException(status_code=400, detail="Missing query or question field")
         
+        persona = request.persona or "Research Scientist"
+        
         response = orchestrator.process_query(
             query=query_text,
-            persona=request.persona or "Research Scientist"
+            persona=persona
         )
         
         if not response.get('success'):
@@ -174,6 +287,44 @@ async def query(request: QueryRequest):
                 status_code=500,
                 detail=response.get('error', 'Query processing failed')
             )
+        
+        # Learn preferences for authenticated users
+        if current_user:
+            from database import UserPreference
+            import json as json_lib
+            
+            # Update user usage count
+            current_user.usage_count += 1
+            
+            # Track persona usage
+            persona_usage = current_user.persona_usage or {}
+            persona_usage[persona] = persona_usage.get(persona, 0) + 1
+            current_user.persona_usage = persona_usage
+            
+            # Set preferred persona (most used)
+            most_used_persona = max(persona_usage, key=persona_usage.get)
+            current_user.preferred_persona = most_used_persona
+            
+            # Extract topics from query and highlighted concepts
+            topics = response.get('highlighted_concepts', [])
+            favorite_topics = current_user.favorite_topics or {}
+            for topic in topics:
+                favorite_topics[topic] = favorite_topics.get(topic, 0) + 1
+            current_user.favorite_topics = favorite_topics
+            
+            # Update last active
+            from datetime import datetime
+            current_user.last_active = datetime.utcnow()
+            
+            # Save user preference entry
+            user_pref = UserPreference(
+                user_id=current_user.id,
+                query=query_text,
+                persona_used=persona,
+                topics_mentioned=topics
+            )
+            db.add(user_pref)
+            db.commit()
         
         # Format response
         return QueryResponse(
@@ -613,12 +764,47 @@ class ChatRequest(BaseModel):
 
 
 @app.post("/api/chat")
-async def chat(request: ChatRequest):
+async def chat(
+    request: ChatRequest,
+    current_user: Optional[User] = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
     Chat endpoint for asking questions about the filtered/displayed data
     Uses Google Gemini API with the current result context to provide relevant answers
+    Includes LangChain memory for authenticated users
     """
     try:
+        # Get or create chat session for authenticated users
+        session_id = None
+        conversation_history = []
+        chat_session = None
+        
+        if current_user:
+            # Import here to avoid circular dependencies
+            from database import ChatSession
+            import uuid
+            
+            # Try to get existing session or create new one
+            session_id = str(uuid.uuid4())
+            chat_session = db.query(ChatSession).filter(
+                ChatSession.user_id == current_user.id
+            ).order_by(ChatSession.created_at.desc()).first()
+            
+            if chat_session:
+                session_id = chat_session.session_id
+                conversation_history = chat_session.conversation_history or []
+            else:
+                # Create new session
+                chat_session = ChatSession(
+                    user_id=current_user.id,
+                    session_id=session_id,
+                    conversation_history=[],
+                    context={}
+                )
+                db.add(chat_session)
+                db.commit()
+        
         # Extract context if provided
         context_text = ""
         publication_details = []
@@ -651,6 +837,15 @@ async def chat(request: ChatRequest):
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-2.0-flash')  # Use same model as analyst
         
+        # Build conversation history for context
+        history_context = ""
+        if conversation_history:
+            history_context = "\n\nPrevious Conversation:\n"
+            for msg in conversation_history[-5:]:  # Last 5 messages for context
+                role = msg.get('role', 'user')
+                content = msg.get('content', '')
+                history_context += f"{role.capitalize()}: {content}\n"
+        
         # Build the prompt for Gemini
         system_context = """You are an expert NASA Space Biology research assistant with deep knowledge of spaceflight biology, microgravity effects, radiation biology, and life sciences research.
 
@@ -668,6 +863,7 @@ Keep responses concise (2-3 paragraphs max) and scientifically accurate."""
         full_prompt = f"""{system_context}
 
 {context_text}
+{history_context}
 
 User Question: {request.message}
 
@@ -676,6 +872,23 @@ Please provide a helpful, accurate answer based on the research context above. I
         # Call Gemini API
         response = model.generate_content(full_prompt)
         response_text = response.text
+        
+        # Save conversation to memory for authenticated users
+        if current_user and chat_session:
+            # Append new messages to history
+            conversation_history.append({
+                "role": "user",
+                "content": request.message
+            })
+            conversation_history.append({
+                "role": "assistant",
+                "content": response_text
+            })
+            
+            # Update session in database
+            chat_session.conversation_history = conversation_history
+            chat_session.context = request.context or {}
+            db.commit()
         
         return {
             "success": True,

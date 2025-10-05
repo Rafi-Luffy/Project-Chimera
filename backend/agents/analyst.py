@@ -134,8 +134,8 @@ Format your response as JSON:
             
             ai_analysis = json.loads(response_text)
             
-            # Compile evidence
-            evidence = self.compile_evidence(publications[:5])
+            # Compile evidence from the actual publications found
+            evidence = self.compile_evidence(publications[:15])  # Use more publications for evidence
             
             return {
                 'consensus': ai_analysis.get('consensus', 'Analysis unavailable'),
@@ -383,9 +383,10 @@ Format your response as JSON:
         return gaps if gaps else ["Research in this area appears comprehensive. Consider specific sub-topics for deeper analysis."]
     
     def compile_evidence(self, publications: List[Dict[str, Any]]) -> List[Dict[str, str]]:
-        """Compile key publications as evidence"""
+        """Compile key publications as evidence - returns different publications for each query"""
         evidence = []
         
+        # Take more publications to show variety (up to 15)
         for pub in publications[:15]:  # Top 15 most relevant
             evidence.append({
                 'title': pub.get('title', 'Untitled'),

@@ -121,14 +121,14 @@ class CommunicatorAgent:
     
     def format_consensus(self, consensus: str, confidence: str, pub_count: int, style: Dict) -> str:
         """Format consensus statement based on persona style"""
-        confidence_badge = f"**{confidence} Confidence** (based on {pub_count} publications)"
+        confidence_badge = f"<strong>{confidence} Confidence</strong> (based on {pub_count} publications)"
         
         if style['tone'] == 'technical':
             return f"{confidence_badge}\n\n{consensus}"
         elif style['tone'] == 'practical':
-            return f"{confidence_badge}\n\n**Key Finding:** {consensus}"
+            return f"{confidence_badge}\n\n<strong>Key Finding:</strong> {consensus}"
         else:  # executive
-            return f"{confidence_badge}\n\n**Bottom Line:** {consensus}"
+            return f"{confidence_badge}\n\n<strong>Bottom Line:</strong> {consensus}"
     
     def format_contradictions(self, contradictions: List[str], style: Dict) -> str:
         """Format contradictions based on persona style"""
@@ -136,32 +136,32 @@ class CommunicatorAgent:
             return "No major contradictions detected in the reviewed literature."
         
         if style['tone'] == 'technical':
-            header = "**Methodological Variations Detected:**"
+            header = "<strong>Methodological Variations Detected:</strong>"
         elif style['tone'] == 'practical':
-            header = "**Areas Requiring Careful Interpretation:**"
+            header = "<strong>Areas Requiring Careful Interpretation:</strong>"
         else:  # executive
-            header = "**Key Uncertainties:**"
+            header = "<strong>Key Uncertainties:</strong>"
         
         formatted = [header]
         for contradiction in contradictions:
-            formatted.append(f"\n• {contradiction}")
+            formatted.append(f"<br/>• {contradiction}")
         
-        return '\n'.join(formatted)
+        return ''.join(formatted)
     
     def format_knowledge_gaps(self, gaps: List[str], style: Dict) -> str:
         """Format knowledge gaps based on persona style"""
         if style['tone'] == 'technical':
-            header = "**Recommended Research Directions:**"
+            header = "<strong>Recommended Research Directions:</strong>"
         elif style['tone'] == 'practical':
-            header = "**What We Still Need to Know:**"
+            header = "<strong>What We Still Need to Know:</strong>"
         else:  # executive
-            header = "**Strategic Research Priorities:**"
+            header = "<strong>Strategic Research Priorities:</strong>"
         
         formatted = [header]
         for gap in gaps:
-            formatted.append(f"\n• {gap}")
+            formatted.append(f"<br/>• {gap}")
         
-        return '\n'.join(formatted)
+        return ''.join(formatted)
     
     def highlight_concepts(self, text: str, concepts: List[str]) -> str:
         """

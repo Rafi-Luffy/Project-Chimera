@@ -235,6 +235,30 @@
   color: var(--text-secondary);
 }
 
+/* Ensure HTML elements render properly */
+.section-text strong {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.section-text br {
+  display: block;
+  content: "";
+  margin: 0.5rem 0;
+}
+
+/* Bullet points spacing */
+.section-text ul,
+.section-text ol {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.section-text li {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
 .entity {
   background: rgba(88, 166, 255, 0.15);
   border-bottom: 2px solid #58A6FF;
