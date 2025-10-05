@@ -54,7 +54,7 @@ interface Brief {
 function App() {
   // Auth state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authToken, setAuthToken] = useState('');
+  const [_authToken, setAuthToken] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [showLogin, setShowLogin] = useState(true);
   
@@ -76,7 +76,7 @@ function App() {
   
   // Dynamic publication count and timestamp
   const [publicationCount, setPublicationCount] = useState(607); // Default value
-  const [lastUpdated, setLastUpdated] = useState(new Date().toLocaleString());
+  const [_lastUpdated, setLastUpdated] = useState(new Date().toLocaleString());
   
   const contentRef = useRef<HTMLDivElement>(null);
   
