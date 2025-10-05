@@ -58,7 +58,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
   return (
     <div className="login-container">
       <div className="login-box">
-        <h1 className="login-title">🚀 NASA Space Biology Knowledge Engine</h1>
+        <h1 className="login-title">Chimera</h1>
         <p className="login-subtitle">AI-Powered Research Assistant</p>
 
         <form className="login-form" onSubmit={handleSubmit}>
@@ -116,8 +116,8 @@ export function Login({ onLoginSuccess }: LoginProps) {
         </form>
 
         <div className="login-info">
-          <p>✨ With an account, your preferences and chat history will be automatically saved</p>
-          <p>🧠 The system learns your preferred persona and favorite topics over time</p>
+          <p>With an account, your preferences and chat history will be automatically saved</p>
+          <p>The system learns your preferred persona and favorite topics over time</p>
         </div>
       </div>
     </div>

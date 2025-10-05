@@ -861,7 +861,18 @@ Key responsibilities:
 - Be honest when information is limited
 - Suggest follow-up questions or areas to explore
 
-Keep responses concise (2-3 paragraphs max) and scientifically accurate."""
+IMPORTANT - Adapt your response depth based on user's request:
+- If user asks for "in-depth", "detailed", "comprehensive", or "thorough" explanation: Provide extensive analysis with multiple paragraphs, specific examples, methodologies, findings, and implications
+- If user asks for "brief", "summary", "overview", or "quick" explanation: Keep response to 1-2 short paragraphs
+- If user asks to "explain" a specific research paper: Provide detailed breakdown including methodology, key findings, significance, and limitations
+- Default to moderate detail (2-3 paragraphs) when user's preference is unclear
+
+When discussing specific research papers:
+- Include study design and methodology
+- Explain key findings in detail
+- Discuss implications and significance
+- Mention limitations and future directions
+- Reference specific data points when available"""
 
         full_prompt = f"""{system_context}
 

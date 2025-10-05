@@ -234,11 +234,18 @@
   background: var(--bg-color);
 }
 
-/* Header */
+/* Header - Centered Hero Section */
 
 .main-header {
   margin-bottom: 32px;
   text-align: center;
+}
+
+.main-header.centered-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 64px; /* Top margin for main title */
 }
 
 .main-title {
@@ -246,25 +253,31 @@
   font-weight: 700;
   color: var(--primary-text);
   margin-bottom: 8px;
+  text-align: center;
 }
 
 .main-subtitle {
   font-size: 16px;
   color: var(--secondary-text);
-  margin-bottom: 32px; /* Add spacing between subtitle and search bar */
+  margin-bottom: 32px; /* Spacing between subtitle and search bar */
+  text-align: center;
 }
 
-/* Command Bar */
+/* Command Bar - Centered with max-width */
 
 .command-bar-section {
   margin-bottom: 48px;
-  margin-top: 32px; /* Additional top margin for more breathing room */
+  margin-top: 32px; /* Top margin for Command Bar */
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .command-bar {
   display: flex;
   gap: 12px;
-  max-width: 900px;
+  max-width: 800px; /* Max-width set to 800px */
+  width: 100%;
   margin: 0 auto;
   background: var(--card-bg);
   border: 2px solid var(--border-color);
@@ -276,6 +289,46 @@
 .command-bar:focus-within {
   border-color: var(--accent-color);
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* OR Separator */
+
+.section-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 48px 0;
+  gap: 16px;
+}
+
+.separator-line {
+  flex: 1;
+  max-width: 200px;
+  height: 1px;
+  background: var(--border-color);
+}
+
+.separator-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--secondary-text);
+  padding: 0 16px;
+}
+
+/* Research Domains Section */
+
+.research-domains-section {
+  text-align: center;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.research-domains-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--primary-text);
+  margin-bottom: 32px;
+  text-align: center;
 }
 
 .command-input {

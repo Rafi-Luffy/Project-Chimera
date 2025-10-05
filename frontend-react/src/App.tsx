@@ -74,6 +74,10 @@ function App() {
   const [categoryPublications, setCategoryPublications] = useState<any[]>([]);
   const [loadingCategory, setLoadingCategory] = useState(false);
   
+  // Dynamic publication count and timestamp
+  const [publicationCount, setPublicationCount] = useState(607); // Default value
+  const [lastUpdated, setLastUpdated] = useState(new Date().toLocaleString());
+  
   const contentRef = useRef<HTMLDivElement>(null);
   
   // Check for existing auth token on mount
@@ -86,6 +90,29 @@ function App() {
       setIsAuthenticated(true);
       setShowLogin(false);
     }
+  }, []);
+  
+  // Fetch publication statistics on mount
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch(`${API_URL}/stats`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.publications) {
+            setPublicationCount(data.publications);
+          }
+          setLastUpdated(new Date().toLocaleString());
+        }
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+      }
+    };
+    
+    fetchStats();
+    // Refresh stats every 5 minutes
+    const interval = setInterval(fetchStats, 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
   
   // Handle login success
@@ -385,12 +412,12 @@ function App() {
       
       {/* Main Content */}
       <main className="main-content" ref={contentRef}>
-        {/* Header with Search Bar */}
-        <header className="main-header">
+        {/* Header with Search Bar - Centered Hero Section */}
+        <header className="main-header centered-hero">
           <h1 className="main-title">NASA Space Biology Knowledge Engine</h1>
           <p className="main-subtitle">Your agentic AI partner for synthesizing decades of research.</p>
           
-          {/* Command Bar - Moved to header */}
+          {/* Command Bar - Centered with max-width */}
           <div className="command-bar-section">
             <div className="command-bar">
               <input
@@ -414,17 +441,22 @@ function App() {
         {/* STATE 1: Welcome Screen (Default) - Shows Categories */}
         {!isStreaming && !brief && !selectedCategory && (
           <>
-            <div className="welcome-content-compact">
-              <h2 className="welcome-title-compact">Welcome to Project Chimera</h2>
-              <p className="welcome-subtitle-compact">
-                Explore research categories below or ask a complex question to begin.
-              </p>
+            {/* OR Separator */}
+            <div className="section-separator">
+              <div className="separator-line"></div>
+              <div className="separator-text">OR</div>
+              <div className="separator-line"></div>
             </div>
-            {/* Category Dashboard - Now appears by default */}
-            <CategoryDashboard 
-              onCategoryClick={handleCategoryClick}
-              searchQuery={query}
-            />
+            
+            {/* Research Domains Section with new title */}
+            <div className="research-domains-section">
+              <h2 className="research-domains-title">Explore {publicationCount} space biology publications across multiple domains</h2>
+              {/* Category Dashboard - Now appears by default */}
+              <CategoryDashboard 
+                onCategoryClick={handleCategoryClick}
+                searchQuery={query}
+              />
+            </div>
           </>
         )}
 
