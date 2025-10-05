@@ -1,13 +1,36 @@
 services:
+  # Backend API Service
   - type: web
     name: chimera-backend-api
     env: python
     region: oregon
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    startCommand: uvicorn backend.main_agents:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: GOOGLE_API_KEY
+        sync: false
+      - key: NEO4J_URI
+        sync: false
+      - key: NEO4J_USERNAME
+        sync: false
+      - key: NEO4J_PASSWORD
+        sync: false
+  
+  # Frontend Static Site
+  - type: web
+    name: chimera-frontend
+    env: static
+    region: oregon
+    plan: free
+    buildCommand: cd frontend-react && npm install && npm run build
+    staticPublishPath: frontend-react/dist
+    envVars:
+      - key: VITE_BACKEND_URL
+        value: https://chimera-backend-api.onrender.com
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
         sync: false

@@ -6,17 +6,18 @@ google-generativeai>=0.8.0
 
 # Backend API
 fastapi==0.109.0
-uvicorn==0.27.0
+uvicorn[standard]==0.27.0
 pydantic==2.5.0
 sse-starlette==1.8.2
 
-# Frontend UI
-streamlit==1.31.0
-streamlit-agraph==0.0.45
+# Frontend UI (optional - remove if not using Streamlit)
+# streamlit==1.31.0
+# streamlit-agraph==0.0.45
 
 # Database & Data Handling
 neo4j==5.16.0
-pandas==2.2.0
+pandas==2.1.4
+numpy<2.0.0
 beautifulsoup4==4.12.3
 requests==2.31.0
 
