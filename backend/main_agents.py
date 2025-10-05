@@ -291,6 +291,7 @@ async def query(
         # Learn preferences for authenticated users
         if current_user:
             from database import UserPreference
+            from sqlalchemy.orm.attributes import flag_modified
             import json as json_lib
             
             # Update user usage count
@@ -300,6 +301,7 @@ async def query(
             persona_usage = current_user.persona_usage or {}
             persona_usage[persona] = persona_usage.get(persona, 0) + 1
             current_user.persona_usage = persona_usage
+            flag_modified(current_user, 'persona_usage')  # Tell SQLAlchemy JSON was modified
             
             # Set preferred persona (most used)
             most_used_persona = max(persona_usage, key=persona_usage.get)
@@ -311,6 +313,7 @@ async def query(
             for topic in topics:
                 favorite_topics[topic] = favorite_topics.get(topic, 0) + 1
             current_user.favorite_topics = favorite_topics
+            flag_modified(current_user, 'favorite_topics')  # Tell SQLAlchemy JSON was modified
             
             # Update last active
             from datetime import datetime
