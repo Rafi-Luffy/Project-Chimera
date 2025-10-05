@@ -5,7 +5,7 @@ interface LoginProps {
   onLoginSuccess: (token: string, email: string) => void;
 }
 
-const API_URL = 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
 export function Login({ onLoginSuccess }: LoginProps) {
   const [isLogin, setIsLogin] = useState(true);

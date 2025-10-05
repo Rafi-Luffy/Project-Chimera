@@ -12,12 +12,10 @@ services:
         value: 3.11.9
       - key: GOOGLE_API_KEY
         sync: false
-      - key: NEO4J_URI
-        sync: false
-      - key: NEO4J_USERNAME
-        sync: false
-      - key: NEO4J_PASSWORD
-        sync: false
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
   
   # Frontend Static Site
   - type: web
@@ -30,7 +28,3 @@ services:
     envVars:
       - key: VITE_BACKEND_URL
         value: https://chimera-backend-api.onrender.com
-      - key: VITE_SUPABASE_URL
-        sync: false
-      - key: VITE_SUPABASE_ANON_KEY
-        sync: false

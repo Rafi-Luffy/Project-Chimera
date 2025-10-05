@@ -5,7 +5,7 @@ import { ChatBot } from './components/ChatBot';
 import { Login } from './components/Login';
 
 // Backend API URL
-const API_URL = 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
 // NASA Data Sources
 const DATA_SOURCES = [
