@@ -1,12 +1,26 @@
 """
-The Analyst Agent - Ultra-Fast Pattern Discovery & Scientific Intelligence
-Role: Query the graph to find patterns, consensus, contradictions in MILLISECONDS
-Optimized for: Instant consensus detection and knowledge gap analysis
+The Analyst Agent - AI-Powered Pattern Discovery & Scientific Intelligence
+Role: Query the graph to find patterns, consensus, contradictions using Google Gemini AI
+Optimized for: Deep analysis with LLM-powered insights
 """
 from typing import List, Dict, Any, Set, Optional
 from collections import Counter, defaultdict
 import re
 import time
+import os
+from dotenv import load_dotenv
+import google.generativeai as genai
+
+# Load environment variables
+load_dotenv()
+
+# Configure Google AI
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+if GOOGLE_API_KEY:
+    genai.configure(api_key=GOOGLE_API_KEY)
+    print(f"✅ Analyst: Google AI configured successfully")
+else:
+    print("⚠️ WARNING: GOOGLE_API_KEY not found. Analyst will use fallback logic.")
 
 
 class AnalystAgent:
@@ -57,30 +71,111 @@ class AnalystAgent:
         """Format log message with agent identity"""
         return f"[{self.name}] {message}"
     
+    def analyze_query_with_ai(self, query: str, publications: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        AI-Powered Analysis using Google Gemini
+        
+        Args:
+            query: User's research question
+            publications: Relevant publications from the knowledge base
+            
+        Returns:
+            Dictionary with AI-generated consensus, contradictions, gaps, and evidence
+        """
+        if not GOOGLE_API_KEY:
+            return self.analyze_query_fallback(query, publications)
+        
+        try:
+            # Prepare context from publications
+            pub_context = "\n\n".join([
+                f"Title: {pub.get('title', 'N/A')}\n"
+                f"Abstract: {pub.get('abstract', 'N/A')[:500]}...\n"
+                f"PMID: {pub.get('pmid', 'N/A')}"
+                for pub in publications[:10]  # Use top 10 most relevant
+            ])
+            
+            # Create AI prompt
+            prompt = f"""You are a scientific research analyst specializing in NASA Space Biology research. 
+            
+Analyze the following research question based on the provided publications:
+
+QUESTION: {query}
+
+PUBLICATIONS:
+{pub_context}
+
+Please provide:
+1. CONSENSUS: What are the main consistent findings across these publications? (2-3 sentences)
+2. CONTRADICTIONS: Are there any conflicting findings or disagreements? List them. If none, say "No major contradictions detected."
+3. KNOWLEDGE GAPS: What aspects of this question need more research? (2-3 specific gaps)
+4. CONFIDENCE LEVEL: Based on {len(publications)} publications, rate as: High Confidence, Medium Confidence, or Low Confidence
+
+Format your response as JSON:
+{{
+  "consensus": "...",
+  "contradictions": ["...", "..."] or [],
+  "knowledge_gaps": ["...", "...", "..."],
+  "confidence": "High Confidence" or "Medium Confidence" or "Low Confidence"
+}}"""
+
+            # Call Gemini AI
+            model = genai.GenerativeModel('gemini-2.0-flash')
+            response = model.generate_content(prompt)
+            
+            # Parse AI response
+            import json
+            response_text = response.text.strip()
+            
+            # Extract JSON from response (handle markdown code blocks)
+            if "```json" in response_text:
+                response_text = response_text.split("```json")[1].split("```")[0].strip()
+            elif "```" in response_text:
+                response_text = response_text.split("```")[1].split("```")[0].strip()
+            
+            ai_analysis = json.loads(response_text)
+            
+            # Compile evidence
+            evidence = self.compile_evidence(publications[:5])
+            
+            return {
+                'consensus': ai_analysis.get('consensus', 'Analysis unavailable'),
+                'contradictions': ai_analysis.get('contradictions', []),
+                'knowledge_gaps': ai_analysis.get('knowledge_gaps', []),
+                'evidence': evidence,
+                'confidence': ai_analysis.get('confidence', 'Medium Confidence'),
+                'publication_count': len(publications),
+                'analysis_method': 'AI-Powered (Gemini)'
+            }
+            
+        except Exception as e:
+            print(f"⚠️ AI Analysis Error: {e}")
+            return self.analyze_query_fallback(query, publications)
+    
+    def analyze_query_fallback(self, query: str, publications: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Fallback to rule-based analysis if AI fails"""
+        concepts = self.extract_concepts(query)
+        
+        return {
+            'consensus': f"Based on {len(publications)} publications, research shows consistent patterns in {', '.join(list(concepts['all'])[:3])}.",
+            'contradictions': [],
+            'knowledge_gaps': ['More research needed in this area.'],
+            'evidence': self.compile_evidence(publications[:5]),
+            'confidence': 'Medium Confidence',
+            'publication_count': len(publications),
+            'analysis_method': 'Rule-Based (Fallback)'
+        }
+    
     def analyze_query(self, query: str) -> Dict[str, Any]:
         """
-        Main analysis method - processes a user query in <30ms
-        
-        **OPTIMIZATIONS:**
-        - Uses pre-compiled regex for instant concept extraction
-        - Caches frequent queries for instant retrieval
-        - Batch processes publications for faster consensus detection
+        Main analysis method - now AI-powered!
         
         Args:
             query: User's research question
             
         Returns:
-            Dictionary with consensus, contradictions, gaps, and evidence
+            Dictionary with AI-generated consensus, contradictions, gaps, and evidence
         """
         start_time = time.time()
-        
-        # Check cache first
-        query_hash = hash(query.lower().strip())
-        if query_hash in self.cached_analyses:
-            cached_result = self.cached_analyses[query_hash].copy()
-            cached_result['from_cache'] = True
-            cached_result['analysis_time_ms'] = 0  # Instant from cache
-            return cached_result
         
         # Extract key concepts from query
         concepts = self.extract_concepts(query)
@@ -96,41 +191,17 @@ class AnalystAgent:
                 'evidence': [],
                 'confidence': 'None',
                 'publication_count': 0,
-                'analysis_time_ms': round((time.time() - start_time) * 1000, 2)
+                'analysis_time_ms': round((time.time() - start_time) * 1000, 2),
+                'analysis_method': 'No Data'
             }
         
-        # Analyze consensus
-        consensus = self.identify_consensus(publications, concepts)
+        # Use AI-powered analysis
+        result = self.analyze_query_with_ai(query, publications)
         
-        # Find contradictions
-        contradictions = self.find_contradictions(publications, concepts)
-        
-        # Identify knowledge gaps
-        gaps = self.identify_knowledge_gaps(concepts, publications)
-        
-        # Compile evidence
-        evidence = self.compile_evidence(publications)
-        
-        # Determine confidence level
-        confidence = self.calculate_confidence(len(publications))
-        
-        analysis_time = round((time.time() - start_time) * 1000, 2)
-        
-        result = {
-            'consensus': consensus,
-            'contradictions': contradictions,
-            'knowledge_gaps': gaps,
-            'evidence': evidence,
-            'confidence': confidence,
-            'publication_count': len(publications),
-            'highlighted_concepts': list(concepts['all']),
-            'analysis_time_ms': analysis_time,
-            'from_cache': False
-        }
-        
-        # Cache result if cache not full
-        if len(self.cached_analyses) < self.max_cache_size:
-            self.cached_analyses[query_hash] = result.copy()
+        # Add timing and concepts
+        result['analysis_time_ms'] = round((time.time() - start_time) * 1000, 2)
+        result['highlighted_concepts'] = list(concepts['all'])
+        result['from_cache'] = False
         
         return result
     
@@ -214,6 +285,24 @@ class AnalystAgent:
                     if pub_id not in pub_ids:
                         pub_ids.add(pub_id)
                         relevant_pubs.append(pub)
+        
+        # FALLBACK: If we found fewer than 5 publications, do a broader keyword search
+        if len(relevant_pubs) < 5:
+            all_pubs_dict = self.cartographer.graph.get('publications', {})
+            query_keywords = [word.lower() for word in concepts['all']]
+            
+            for pub_id, pub in all_pubs_dict.items():
+                if pub_id not in pub_ids:
+                    # Check if any keyword appears in title or abstract
+                    title = pub.get('title', '').lower()
+                    abstract = pub.get('abstract', '').lower()
+                    
+                    if any(keyword in title or keyword in abstract for keyword in query_keywords):
+                        pub_ids.add(pub_id)
+                        relevant_pubs.append(pub)
+                        
+                        if len(relevant_pubs) >= 20:  # Get at least 20 for good AI analysis
+                            break
         
         return relevant_pubs[:50]  # Limit to top 50
     

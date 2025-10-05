@@ -211,12 +211,14 @@
 .main-subtitle {
   font-size: 16px;
   color: var(--secondary-text);
+  margin-bottom: 32px; /* Add spacing between subtitle and search bar */
 }
 
 /* Command Bar */
 
 .command-bar-section {
   margin-bottom: 48px;
+  margin-top: 32px; /* Additional top margin for more breathing room */
 }
 
 .command-bar {
@@ -316,6 +318,32 @@
   padding: 12px 20px;
   font-size: 14px;
   color: var(--secondary-text);
+}
+
+/* Compact Welcome Section - Centered with spacing */
+.welcome-content-compact {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 100px auto; /* Large bottom margin for "one page space" */
+  padding: 40px 20px;
+}
+
+.welcome-title-compact {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--primary-text);
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.welcome-subtitle-compact {
+  font-size: 18px;
+  color: var(--secondary-text);
+  line-height: 1.6;
+  margin: 0;
 }
 
 .hint-icon {
@@ -747,5 +775,174 @@
   .toolbar-section {
     flex-direction: column;
     align-items: stretch;
+  }
+}
+
+/* === Category Publications View === */
+
+.category-publications-screen {
+  animation: fadeIn 0.4s ease;
+}
+
+.category-header {
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.back-button {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 20px;
+  color: var(--primary-text);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.back-button:hover {
+  background: var(--hover-bg);
+  border-color: var(--accent-color);
+  transform: translateX(-4px);
+}
+
+.category-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--primary-text);
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.category-subtitle {
+  font-size: 16px;
+  color: var(--secondary-text);
+  margin-bottom: 0;
+}
+
+.loading-publications {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  gap: 16px;
+}
+
+.loading-spinner {
+  font-size: 48px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.publications-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding-bottom: 100px;
+}
+
+.publication-card {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 24px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.publication-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--accent-color), #8b5cf6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.publication-card:hover {
+  border-color: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+}
+
+.publication-card:hover::before {
+  opacity: 1;
+}
+
+.publication-date {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent-color);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 4px;
+}
+
+.publication-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.publication-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--primary-text);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.publication-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent-color);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  width: fit-content;
+}
+
+.publication-link:hover {
+  gap: 12px;
+  color: #60a5fa;
+}
+
+@media (max-width: 768px) {
+  .publication-card {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .publication-date {
+    justify-content: flex-start;
+    padding-top: 0;
+  }
+  
+  .category-title {
+    font-size: 24px;
   }
 }

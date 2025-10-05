@@ -10,6 +10,10 @@ import json
 import asyncio
 import sys
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Add backend directory to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
@@ -639,13 +643,13 @@ async def chat(request: ChatRequest):
         import google.generativeai as genai
         import os
         
-        api_key = os.getenv("GEMINI_API_KEY")
+        api_key = os.getenv("GOOGLE_API_KEY")  # Use same env var as analyst
         if not api_key:
-            print("WARNING: No GEMINI_API_KEY found, using template responses")
+            print("WARNING: No GOOGLE_API_KEY found, using template responses")
             return generate_template_response(request.message, request.context)
         
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-2.0-flash')  # Use same model as analyst
         
         # Build the prompt for Gemini
         system_context = """You are an expert NASA Space Biology research assistant with deep knowledge of spaceflight biology, microgravity effects, radiation biology, and life sciences research.
