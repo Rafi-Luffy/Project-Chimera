@@ -16,8 +16,8 @@ sse-starlette==1.8.2
 
 # Database & Data Handling
 neo4j==5.16.0
+numpy==1.26.4
 pandas==2.1.4
-numpy<2.0.0
 beautifulsoup4==4.12.3
 requests==2.31.0
 
