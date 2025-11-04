@@ -12,16 +12,16 @@ The NASA Space Biology Knowledge Engine is an intelligent research assistant tha
 
 ### Key Features
 
-- ** 5-Agent AI System**: Librarian, Cartographer, Analyst, Communicator, Orchestrator
-- ** Google Gemini 2.0 Flash**: AI-powered dynamic analysis
-- ** Authentication**: Email/password login with JWT tokens
-- ** Smart Memory**: LangChain conversation history for authenticated users
-- ** Auto-Learning**: System learns your preferred persona and favorite topics
-- ** Persona-Based Responses**: Tailored insights for Scientists, Architects, and Managers
-- ** Real-Time Analysis**: Dynamic evidence from 607 NASA publications
-- ** Advanced Search**: Natural language queries with AI understanding
-- ** Synthesized Briefs**: Consensus, contradictions, and knowledge gaps in one view
-- ** AI Chatbot**: Context-aware chat assistant with memory
+- **5-Agent AI System**: Librarian, Cartographer, Analyst, Communicator, Orchestrator
+- **Google Gemini 2.0 Flash**: AI-powered dynamic analysis
+- **Authentication**: Email/password login with JWT tokens
+- **Smart Memory**: LangChain conversation history for authenticated users
+- **Auto-Learning**: System learns your preferred persona and favorite topics
+- **Persona-Based Responses**: Tailored insights for Scientists, Architects, and Managers
+- **Real-Time Analysis**: Dynamic evidence from 607 NASA publications
+- **Advanced Search**: Natural language queries with AI understanding
+- **Synthesized Briefs**: Consensus, contradictions, and knowledge gaps in one view
+- **AI Chatbot**: Context-aware chat assistant with memory
 
 ---
 
