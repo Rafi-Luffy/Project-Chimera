@@ -1,8 +1,4 @@
-# 🚀 NASA Space Biology Knowledge Engine
-
-> ⚡ **MAJOR UPDATE:** System optimized for **millisecond performance!** See [OPTIMIZATION_COMPLETE.md](OPTIMIZATION_COMPLETE.md)  
-> � **NEW:** Authentication system with auto-learning preferences! See [AUTH_SYSTEM_SUMMARY.md](AUTH_SYSTEM_SUMMARY.md)  
-> �📊 **New:** Real-time performance dashboard | 📡 **New:** Dynamic NASA data sources | 🏆 **Result:** 80x faster!
+# NASA Space Biology Knowledge Engine
 
 **Nakamas United - NASA Space Apps Challenge 2025**
 
@@ -10,26 +6,26 @@ An agentic AI system that synthesizes insights from over 600 space biology publi
 
 ---
 
-## 🎯 Project Overview
+## Project Overview
 
 The NASA Space Biology Knowledge Engine is an intelligent research assistant that helps scientists, mission architects, and managers quickly find consensus, contradictions, and knowledge gaps across decades of space biology research. Using Google Gemini AI and a 5-agent orchestrator system, it provides evidence-based insights tailored to your role.
 
 ### Key Features
 
-- **🤖 5-Agent AI System**: Librarian, Cartographer, Analyst, Communicator, Orchestrator
-- **🧠 Google Gemini 2.0 Flash**: AI-powered dynamic analysis
-- **🔐 Authentication**: Email/password login with JWT tokens
-- **💾 Smart Memory**: LangChain conversation history for authenticated users
-- **🎓 Auto-Learning**: System learns your preferred persona and favorite topics
-- **🎭 Persona-Based Responses**: Tailored insights for Scientists, Architects, and Managers
-- **📊 Real-Time Analysis**: Dynamic evidence from 607 NASA publications
-- **🔍 Advanced Search**: Natural language queries with AI understanding
-- **📝 Synthesized Briefs**: Consensus, contradictions, and knowledge gaps in one view
-- **💬 AI Chatbot**: Context-aware chat assistant with memory
+- ** 5-Agent AI System**: Librarian, Cartographer, Analyst, Communicator, Orchestrator
+- ** Google Gemini 2.0 Flash**: AI-powered dynamic analysis
+- ** Authentication**: Email/password login with JWT tokens
+- ** Smart Memory**: LangChain conversation history for authenticated users
+- ** Auto-Learning**: System learns your preferred persona and favorite topics
+- ** Persona-Based Responses**: Tailored insights for Scientists, Architects, and Managers
+- ** Real-Time Analysis**: Dynamic evidence from 607 NASA publications
+- ** Advanced Search**: Natural language queries with AI understanding
+- ** Synthesized Briefs**: Consensus, contradictions, and knowledge gaps in one view
+- ** AI Chatbot**: Context-aware chat assistant with memory
 
 ---
 
-## 🆕 Authentication & Memory System
+## Authentication & Memory System
 
 ### Features:
 - **Email/Password Authentication**: Secure JWT token-based auth
