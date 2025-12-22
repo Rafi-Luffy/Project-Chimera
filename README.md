@@ -45,7 +45,7 @@ The NASA Space Biology Knowledge Engine is an intelligent research assistant tha
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -78,7 +78,7 @@ The NASA Space Biology Knowledge Engine is an intelligent research assistant tha
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -205,7 +205,7 @@ The app will open in your browser at `http://localhost:8501`
 
 ---
 
-## 🏛️ Project Structure
+## Project Structure
 
 ```
 nasa-knowledge-engine/
@@ -229,7 +229,7 @@ nasa-knowledge-engine/
 
 ---
 
-## 🔧 API Documentation
+## API Documentation
 
 ### Endpoints
 
@@ -293,7 +293,7 @@ Get knowledge graph statistics.
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ### Test the Backend
 
@@ -320,7 +320,7 @@ curl -X POST http://127.0.0.1:8000/query \
 
 ---
 
-## 🎓 How It Works
+## How It Works
 
 ### The Chimera Agent
 
@@ -350,7 +350,7 @@ The Neo4j graph contains:
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Backend won't start
 - Check that `.env` file exists with valid credentials
@@ -374,7 +374,7 @@ The Neo4j graph contains:
 
 ---
 
-## 🚀 Deployment
+## Deployment
 
 ### Deploy Backend (Railway/Render)
 
@@ -395,7 +395,7 @@ The Neo4j graph contains:
 
 ---
 
-## 🏆 Hackathon Presentation Tips
+## Hackathon Presentation Tips
 
 ### What to Demonstrate
 
@@ -419,19 +419,19 @@ The Neo4j graph contains:
 
 ---
 
-## 📄 License
+## License
 
 This project was created for the NASA Space Apps Challenge 2025.
 
 ---
 
-## 👥 Team: Nakamas United
+## Team: Nakamas United
 
 Built with passion for space exploration and AI innovation.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - NASA Space Biology Program
 - OpenAI for GPT-4 API
@@ -440,4 +440,4 @@ Built with passion for space exploration and AI innovation.
 
 ---
 
-**🚀 Ready to ignite discovery!**
+**Ready to ignite discovery!**
